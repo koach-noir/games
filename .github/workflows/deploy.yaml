@@ -22,4 +22,4 @@ jobs:
 
     - name: Purge jsDelivr cache
       run: |
-        curl -X POST https://purge.jsdelivr.net/gh/${{ github.repository }}@gh-pages/
+        curl -X GET "https://purge.jsdelivr.net/gh/${{ github.repository }}@gh-pages/"
