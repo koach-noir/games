@@ -3,12 +3,13 @@ export default class Balloon {
         this.size = config.size || 100;
         this.type = config.type || 'b01';
         this.gameContainer = config.gameContainer;
-        this.id = Math.random().toString(36).substr(2, 9);
+        this.id = Math.random().toString(36).slice(2, 11);
         this.element = this.createElement();
         this.isBeingTouched = false;
         this.longPressTimer = null;
         this.shrinkInterval = null;
         this.wobbleInterval = null;
+        this.isPopped = false;
 
         this.setupEventListeners();
         this.startWobbling();
@@ -32,18 +33,27 @@ export default class Balloon {
     }
 
     pop() {
+        if (this.isPopped) return;
+        this.isPopped = true;
+
         this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
         this.element.classList.add('popped');
+        
         this.playPopSound();
         this.stopAllIntervals();
         
-        // ポップイベントをディスパッチ
         this.element.dispatchEvent(new Event('popped'));
+
+        setTimeout(() => {
+            if (this.element.parentNode) {
+                this.element.parentNode.removeChild(this.element);
+            }
+        }, 300);
     }
 
     playPopSound() {
         const audio = new Audio(`resources/balloon/${this.type}_pop.mp3`);
-        audio.play();
+        audio.play().catch(error => console.error('Error playing audio:', error));
     }
 
     setupEventListeners() {

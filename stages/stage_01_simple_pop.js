@@ -4,16 +4,16 @@ export default class Stage01SimplePop {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.gameContainer = gameManager.getGameContainer();
-        this.balloonCount = 7;
+        this.balloonCount = 1;
         this.balloons = [];
-        this.clearCondition = 10;
+        this.clearCondition = 5;
         this.eventListeners = [];
     }
 
     start() {
         this.cleanup();
         this.createBalloons();
-        this.gameManager.showStageNotification("Stage 1: Pop 10 balloons!");
+        this.gameManager.showStageNotification("Stage 1: Pop 5 balloons!");
     }
 
     createBalloons() {
