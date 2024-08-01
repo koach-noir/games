@@ -1,36 +1,49 @@
 export default class Balloon {
-    constructor({ type, gameContainer }) {
-        console.log(`[Balloon] Creating new balloon of type: ${type}`);
-        this.type = type;
-        this.gameContainer = gameContainer;
+    constructor(config) {
+        this.size = config.size || 100;
+        this.type = config.type || 'b01';
+        this.gameContainer = config.gameContainer;
         this.id = Math.random().toString(36).substr(2, 9);
-        this.size = 100;
         this.element = this.createElement();
-        console.log(`[Balloon] Background image:`, window.getComputedStyle(this.element).backgroundImage);
         this.isBeingTouched = false;
         this.longPressTimer = null;
         this.shrinkInterval = null;
         this.wobbleInterval = null;
-        
+
         this.setupEventListeners();
         this.startWobbling();
         this.startShrinking();
-
-        console.log(`[Balloon] Background image:`, window.getComputedStyle(this.element).backgroundImage);
     }
 
     createElement() {
-        const element = document.createElement('div');
-        element.className = `balloon ${this.type}`;
-        element.style.position = 'absolute';
-        element.style.transition = 'transform 0.3s ease';
-        return element;
+        const balloon = document.createElement('div');
+        balloon.className = `balloon ${this.type}`;
+        balloon.style.width = `${this.size}px`;
+        balloon.style.height = `${this.size}px`;
+        balloon.style.backgroundImage = `url('resources/balloon/${this.type}.png')`;
+        balloon.style.position = 'absolute';
+        balloon.style.transition = 'transform 0.3s ease';
+        return balloon;
     }
 
-    setPosition(left, top) {
-        console.log(`[Balloon] Setting position to (${left}, ${top})`);
-        this.element.style.left = `${left}px`;
-        this.element.style.top = `${top}px`;
+    setPosition(x, y) {
+        this.element.style.left = `${x}px`;
+        this.element.style.top = `${y}px`;
+    }
+
+    pop() {
+        this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
+        this.element.classList.add('popped');
+        this.playPopSound();
+        this.stopAllIntervals();
+        
+        // ポップイベントをディスパッチ
+        this.element.dispatchEvent(new Event('popped'));
+    }
+
+    playPopSound() {
+        const audio = new Audio(`resources/balloon/${this.type}_pop.mp3`);
+        audio.play();
     }
 
     setupEventListeners() {
@@ -70,15 +83,7 @@ export default class Balloon {
 
     continuousInflate() {
         this.continuousInflateInterval = setInterval(() => {
-            if (this.size < 100) {
-                this.size += 10;
-            } else if (this.size < 180) {
-                this.size += 20;
-            } else {
-                this.size += 10;
-            }
-            this.updateSize();
-            this.checkPop();
+            this.inflate();
         }, 300);
     }
 
@@ -92,8 +97,7 @@ export default class Balloon {
         const currentLeft = parseInt(this.element.style.left);
         const currentTop = parseInt(this.element.style.top);
         
-        this.element.style.left = `${currentLeft + direction.x * 10}px`;
-        this.element.style.top = `${currentTop + direction.y * 10}px`;
+        this.setPosition(currentLeft + direction.x * 10, currentTop + direction.y * 10);
     }
 
     startShrinking() {
@@ -121,7 +125,8 @@ export default class Balloon {
     }
 
     updateSize() {
-        this.element.style.transform = `scale(${this.size / 100})`;
+        this.element.style.width = `${this.size}px`;
+        this.element.style.height = `${this.size}px`;
     }
 
     checkPop() {
@@ -134,14 +139,9 @@ export default class Balloon {
         }
     }
 
-    pop() {
+    stopAllIntervals() {
         clearInterval(this.shrinkInterval);
         clearInterval(this.wobbleInterval);
-        this.element.classList.add('popped');
-        setTimeout(() => {
-            if (this.element.parentNode) {
-                this.element.parentNode.removeChild(this.element);
-            }
-        }, 300);
+        clearInterval(this.continuousInflateInterval);
     }
 }
