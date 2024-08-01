@@ -8,13 +8,14 @@ export default class Stage02SimplePop {
         this.balloons = [];
         this.clearCondition = 3;
         this.tapCount = {};
+        this.initialSizes = {};
         this.eventListeners = [];
     }
 
     start() {
-        this.cleanup(); // 開始前にクリーンアップを実行
+        this.cleanup();
         this.createBalloons();
-        this.gameManager.showStageNotification("Stage 2: Pop 3 balloons! Each balloon needs 5 taps.");
+        this.gameManager.showStageNotification("Stage 2: Pop 3 balloons! Tap to inflate, pop when they're too big!");
     }
 
     createBalloons() {
@@ -33,6 +34,11 @@ export default class Stage02SimplePop {
         const top = Math.random() * (this.gameContainer.clientHeight - balloon.size);
         balloon.setPosition(left, top);
 
+        // 初期サイズをランダムに設定 (50%~100%)
+        const initialScale = 0.5 + Math.random() * 0.5;
+        this.initialSizes[balloon.id] = initialScale;
+        balloon.element.style.transform = `scale(${initialScale})`;
+
         const clickHandler = () => this.tapBalloon(balloon);
         balloon.element.addEventListener('click', clickHandler);
         this.eventListeners.push({ element: balloon.element, type: 'click', handler: clickHandler });
@@ -44,10 +50,12 @@ export default class Stage02SimplePop {
 
     tapBalloon(balloon) {
         this.tapCount[balloon.id]++;
-        if (this.tapCount[balloon.id] >= 5) {
+        const currentScale = this.initialSizes[balloon.id] * (1 + this.tapCount[balloon.id] * 0.3);
+        
+        if (currentScale > this.initialSizes[balloon.id] * 2) {
             this.popBalloon(balloon);
         } else {
-            balloon.element.style.transform = `scale(${1 + this.tapCount[balloon.id] * 0.1})`;
+            balloon.element.style.transform = `scale(${currentScale})`;
         }
     }
 
@@ -67,7 +75,7 @@ export default class Stage02SimplePop {
         }
         this.balloons = this.balloons.filter(b => b !== balloon);
         delete this.tapCount[balloon.id];
-        // イベントリスナーを削除
+        delete this.initialSizes[balloon.id];
         const listenerIndex = this.eventListeners.findIndex(
             listener => listener.element === balloon.element
         );
@@ -84,20 +92,14 @@ export default class Stage02SimplePop {
     }
 
     cleanup() {
-        // 全ての風船を削除
         this.balloons.forEach(balloon => this.removeBalloon(balloon));
         this.balloons = [];
-
-        // 残っているイベントリスナーを削除
         this.eventListeners.forEach(({ element, type, handler }) => {
             element.removeEventListener(type, handler);
         });
         this.eventListeners = [];
-
-        // タップカウントをリセット
         this.tapCount = {};
-
-        // ゲームコンテナをクリア
+        this.initialSizes = {};
         while (this.gameContainer.firstChild) {
             this.gameContainer.removeChild(this.gameContainer.firstChild);
         }
