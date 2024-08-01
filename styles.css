@@ -13,15 +13,15 @@ body {
 
 .balloon {
     position: absolute;
-    width: 100px;
-    height: 100px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .balloon.popped {
     transform: scale(1.2);
     opacity: 0;
+    pointer-events: none;
 }
