@@ -35,20 +35,33 @@ export default class Balloon {
     pop() {
         if (this.isPopped) return;
         this.isPopped = true;
-
+    
+        // 画像を変更
         this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
-        this.element.classList.add('popped');
         
-        this.playPopSound();
-        this.stopAllIntervals();
+        // アニメーションのための準備
+        this.element.style.transition = 'all 0.3s ease';
         
-        this.element.dispatchEvent(new Event('popped'));
-
+        // 少し遅延させてからアニメーションを開始
         setTimeout(() => {
-            if (this.element.parentNode) {
-                this.element.parentNode.removeChild(this.element);
-            }
-        }, 300);
+            this.element.classList.add('popped');
+            
+            // 音を再生
+            this.playPopSound();
+            
+            // すべてのインターバルを停止
+            this.stopAllIntervals();
+            
+            // ポップイベントをディスパッチ
+            this.element.dispatchEvent(new Event('popped'));
+    
+            // アニメーション完了後に要素を削除
+            setTimeout(() => {
+                if (this.element.parentNode) {
+                    this.element.parentNode.removeChild(this.element);
+                }
+            }, 300); // CSSのtransitionと同じ時間（0.3秒）
+        }, 50); // 50ミリ秒の遅延を追加
     }
 
     playPopSound() {
