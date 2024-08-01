@@ -20,11 +20,18 @@ function startNextStage() {
         if (container) {
             container.innerHTML = ''; // コンテナをクリア
         }
-        const StageClass = stages[currentStageIndex];
-        const stage = new StageClass(gameManager);
-        gameManager.setCurrentStage(stage);
-        stage.start();
-        currentStageIndex++;
+        
+        // ステージ開始の通知を表示
+        gameManager.showStageNotification(`Stage ${currentStageIndex + 1} is starting...`);
+        
+        // 1秒のディレイを追加
+        setTimeout(() => {
+            const StageClass = stages[currentStageIndex];
+            const stage = new StageClass(gameManager);
+            gameManager.setCurrentStage(stage);
+            stage.start();
+            currentStageIndex++;
+        }, 1000);
     } else {
         showRestartPopup();
         playCelebrationSound();
@@ -122,7 +129,13 @@ function restartGame() {
     startNextStage();
 }
 
-gameManager.onStageClear = startNextStage;
+gameManager.onStageClear = () => {
+    // ステージクリアの通知を表示
+    gameManager.showStageNotification("Stage Clear! Next stage is coming...");
+    
+    // 少し待ってから次のステージを開始
+    setTimeout(startNextStage, 1500);
+};
 
 // ページの読み込みが完了したらゲームを開始
 window.addEventListener('load', startNextStage);
