@@ -4,7 +4,7 @@ export default class Stage01SimplePop {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.gameContainer = gameManager.getGameContainer();
-        this.balloonCount = 5;
+        this.balloonCount = 10;
         this.balloons = [];
         this.clearCondition = 10;
         this.eventListeners = [];
@@ -25,7 +25,7 @@ export default class Stage01SimplePop {
     createBalloon() {
         const balloon = new Balloon({
             type: this.getRandomBalloonType(),
-            size: 100
+            size: 200
         });
         
         const left = Math.random() * (this.gameContainer.clientWidth - balloon.size);

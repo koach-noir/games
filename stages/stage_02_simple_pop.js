@@ -4,9 +4,9 @@ export default class Stage02SimplePop {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.gameContainer = gameManager.getGameContainer();
-        this.balloonCount = 5;
+        this.balloonCount = 3;
         this.balloons = [];
-        this.clearCondition = 3;
+        this.clearCondition = 7;
         this.tapCount = {};
         this.initialSizes = {};
         this.eventListeners = [];
