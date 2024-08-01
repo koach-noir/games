@@ -19,10 +19,15 @@ project構成です。
 
 ```
 koach-noir\games\index.html
+koach-noir\games\main.js
+koach-noir\games\modules
 koach-noir\games\README.md
 koach-noir\games\resources
 koach-noir\games\script.js
+koach-noir\games\stages
 koach-noir\games\styles.css
+koach-noir\games\modules\balloon.js
+koach-noir\games\modules\game_manager.js
 koach-noir\games\resources\balloon
 koach-noir\games\resources\common
 koach-noir\games\resources\balloon\b01.png
@@ -41,6 +46,9 @@ koach-noir\games\resources\balloon\b05.png
 koach-noir\games\resources\balloon\b05_pop.mp3
 koach-noir\games\resources\balloon\b05_pop.png
 koach-noir\games\resources\common\celebration_clap.mp3
+koach-noir\games\stages\stage_01_simple_pop.js
+koach-noir\games\stages\stage_02_simple_pop.js
+
 ```
 
 ここまでよろしいですか？

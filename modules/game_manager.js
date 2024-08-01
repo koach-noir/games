@@ -18,7 +18,7 @@ export default class GameManager {
     incrementScore(points = 1) {
         this.score += points;
         console.log(`Score: ${this.score}`);
-        if (this.currentStage.checkClearCondition(this.score)) {
+        if (this.currentStage && this.currentStage.checkClearCondition(this.score)) {
             this.onStageClear();
         }
     }
@@ -51,5 +51,15 @@ export default class GameManager {
         setTimeout(() => {
             this.gameContainer.removeChild(notification);
         }, 3000);
+    }
+
+    reset() {
+        this.score = 0;
+        this.gameContainer.innerHTML = '';
+        if (this.currentStage) {
+            this.currentStage.cleanup();
+        }
+        this.currentStage = null;
+        this.stopCelebrationAudio();
     }
 }

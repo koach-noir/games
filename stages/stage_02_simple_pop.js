@@ -8,9 +8,11 @@ export default class Stage02SimplePop {
         this.balloons = [];
         this.clearCondition = 3;
         this.tapCount = {};
+        this.eventListeners = [];
     }
 
     start() {
+        this.cleanup(); // 開始前にクリーンアップを実行
         this.createBalloons();
         this.gameManager.showStageNotification("Stage 2: Pop 3 balloons! Each balloon needs 5 taps.");
     }
@@ -31,7 +33,9 @@ export default class Stage02SimplePop {
         const top = Math.random() * (this.gameContainer.clientHeight - balloon.size);
         balloon.setPosition(left, top);
 
-        balloon.element.addEventListener('click', () => this.tapBalloon(balloon));
+        const clickHandler = () => this.tapBalloon(balloon);
+        balloon.element.addEventListener('click', clickHandler);
+        this.eventListeners.push({ element: balloon.element, type: 'click', handler: clickHandler });
         
         this.gameContainer.appendChild(balloon.element);
         this.balloons.push(balloon);
@@ -52,11 +56,26 @@ export default class Stage02SimplePop {
         this.gameManager.incrementScore();
         
         setTimeout(() => {
-            this.gameContainer.removeChild(balloon.element);
-            this.balloons = this.balloons.filter(b => b !== balloon);
-            delete this.tapCount[balloon.id];
+            this.removeBalloon(balloon);
             this.createBalloon();
         }, 300);
+    }
+
+    removeBalloon(balloon) {
+        if (this.gameContainer.contains(balloon.element)) {
+            this.gameContainer.removeChild(balloon.element);
+        }
+        this.balloons = this.balloons.filter(b => b !== balloon);
+        delete this.tapCount[balloon.id];
+        // イベントリスナーを削除
+        const listenerIndex = this.eventListeners.findIndex(
+            listener => listener.element === balloon.element
+        );
+        if (listenerIndex !== -1) {
+            const { element, type, handler } = this.eventListeners[listenerIndex];
+            element.removeEventListener(type, handler);
+            this.eventListeners.splice(listenerIndex, 1);
+        }
     }
 
     getRandomBalloonType() {
@@ -65,11 +84,23 @@ export default class Stage02SimplePop {
     }
 
     cleanup() {
-        this.balloons.forEach(balloon => {
-            this.gameContainer.removeChild(balloon.element);
-        });
+        // 全ての風船を削除
+        this.balloons.forEach(balloon => this.removeBalloon(balloon));
         this.balloons = [];
+
+        // 残っているイベントリスナーを削除
+        this.eventListeners.forEach(({ element, type, handler }) => {
+            element.removeEventListener(type, handler);
+        });
+        this.eventListeners = [];
+
+        // タップカウントをリセット
         this.tapCount = {};
+
+        // ゲームコンテナをクリア
+        while (this.gameContainer.firstChild) {
+            this.gameContainer.removeChild(this.gameContainer.firstChild);
+        }
     }
 
     checkClearCondition(score) {

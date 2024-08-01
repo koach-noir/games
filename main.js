@@ -10,6 +10,7 @@ let currentStageIndex = 0;
 
 function startNextStage() {
     if (currentStageIndex < stages.length) {
+        gameManager.container.innerHTML = ''; // コンテナをクリア
         const StageClass = stages[currentStageIndex];
         const stage = new StageClass(gameManager);
         gameManager.setCurrentStage(stage);
@@ -89,7 +90,7 @@ function playCelebrationSound() {
 function restartGame() {
     currentStageIndex = 0;
     gameManager.stopCelebrationAudio();
-    gameContainer.innerHTML = '';
+    gameManager.reset(); // 新しく追加したリセットメソッドを呼び出す
     startNextStage();
 }
 
