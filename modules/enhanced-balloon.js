@@ -1,5 +1,6 @@
 export default class Balloon {
     constructor({ type, gameContainer }) {
+        console.log(`[Balloon] Creating new balloon of type: ${type}`);
         this.type = type;
         this.gameContainer = gameContainer;
         this.id = Math.random().toString(36).substr(2, 9);
@@ -24,6 +25,7 @@ export default class Balloon {
     }
 
     setPosition(left, top) {
+        console.log(`[Balloon] Setting position to (${left}, ${top})`);
         this.element.style.left = `${left}px`;
         this.element.style.top = `${top}px`;
     }

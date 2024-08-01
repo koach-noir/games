@@ -23,6 +23,7 @@ export default class Stage02SimplePop {
     }
 
     createBalloon() {
+        console.log('[Stage] Starting to create a new balloon');
         const balloon = new Balloon({
             type: this.getRandomBalloonType(),
             gameContainer: this.gameContainer
