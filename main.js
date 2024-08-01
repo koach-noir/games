@@ -9,7 +9,7 @@ if (!gameContainer) {
 }
 
 const gameManager = new GameManager(gameContainer);
-gameManager.setDebugMode(true); // デバッグモードを有効化（必要に応じてfalseに設定）
+gameManager.setDebugMode(false); // デバッグモードを有効化（必要に応じてfalseに設定）
 
 const stages = [Stage01SimplePop, Stage02SimplePop];
 let currentStageIndex = 0;
@@ -20,9 +20,6 @@ function startNextStage() {
         if (container) {
             container.innerHTML = ''; // コンテナをクリア
         }
-        
-        // ステージ開始の通知を表示
-        gameManager.showStageNotification(`Stage ${currentStageIndex + 1} is starting...`);
         
         // 1秒のディレイを追加
         setTimeout(() => {
@@ -129,13 +126,7 @@ function restartGame() {
     startNextStage();
 }
 
-gameManager.onStageClear = () => {
-    // ステージクリアの通知を表示
-    gameManager.showStageNotification("Stage Clear! Next stage is coming...");
-    
-    // 少し待ってから次のステージを開始
-    setTimeout(startNextStage, 1500);
-};
+gameManager.onStageClear = startNextStage;
 
 // ページの読み込みが完了したらゲームを開始
 window.addEventListener('load', startNextStage);
