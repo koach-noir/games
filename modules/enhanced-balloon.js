@@ -14,6 +14,8 @@ export default class Balloon {
         this.setupEventListeners();
         this.startWobbling();
         this.startShrinking();
+
+        console.log(`[Balloon] Background image:`, window.getComputedStyle(this.element).backgroundImage);
     }
 
     createElement() {
