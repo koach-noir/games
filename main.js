@@ -37,18 +37,37 @@ function showRestartPopup() {
     const popup = document.createElement('div');
     popup.style.backgroundColor = 'white';
     popup.style.padding = '20px';
-    popup.style.borderRadius = '10px';
+    popup.style.borderRadius = '20px';
     popup.style.textAlign = 'center';
+    popup.style.boxShadow = '0 0 20px rgba(0,0,0,0.3)';
 
     const message = document.createElement('p');
-    message.textContent = 'おめでとう！すべてのステージをクリアしました！';
+    message.textContent = 'おめでとう！すべてのステージをクリアしたよ！';
     message.style.marginBottom = '20px';
+    message.style.fontSize = '24px';
+    message.style.fontWeight = 'bold';
+    message.style.color = '#FF4500';
 
     const restartButton = document.createElement('button');
-    restartButton.textContent = 'もう一度挑戦する';
-    restartButton.style.padding = '10px 20px';
-    restartButton.style.fontSize = '16px';
+    restartButton.textContent = 'もう一度あそぶ！';
+    restartButton.style.padding = '15px 30px';
+    restartButton.style.fontSize = '20px';
+    restartButton.style.fontWeight = 'bold';
     restartButton.style.cursor = 'pointer';
+    restartButton.style.backgroundColor = '#4CAF50';
+    restartButton.style.color = 'white';
+    restartButton.style.border = 'none';
+    restartButton.style.borderRadius = '50px';
+    restartButton.style.boxShadow = '0 5px 0 #45a049';
+    restartButton.style.transition = 'all 0.1s';
+    restartButton.addEventListener('mouseover', () => {
+        restartButton.style.transform = 'translateY(2px)';
+        restartButton.style.boxShadow = '0 3px 0 #45a049';
+    });
+    restartButton.addEventListener('mouseout', () => {
+        restartButton.style.transform = 'translateY(0)';
+        restartButton.style.boxShadow = '0 5px 0 #45a049';
+    });
     restartButton.addEventListener('click', () => {
         document.body.removeChild(popupOverlay);
         restartGame();
@@ -77,4 +96,6 @@ function restartGame() {
 gameManager.onStageClear = startNextStage;
 
 // ページの読み込みが完了したらゲームを開始
-window.addEventListener('load', startNextStage);
+window.addEventListener('load', () => {
+    startNextStage();
+});
