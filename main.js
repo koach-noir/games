@@ -16,16 +16,48 @@ function startNextStage() {
         stage.start();
         currentStageIndex++;
     } else {
-        showRestartButton();
+        showRestartPopup();
         playCelebrationSound();
     }
 }
 
-function showRestartButton() {
+function showRestartPopup() {
+    const popupOverlay = document.createElement('div');
+    popupOverlay.style.position = 'fixed';
+    popupOverlay.style.top = '0';
+    popupOverlay.style.left = '0';
+    popupOverlay.style.width = '100%';
+    popupOverlay.style.height = '100%';
+    popupOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    popupOverlay.style.display = 'flex';
+    popupOverlay.style.justifyContent = 'center';
+    popupOverlay.style.alignItems = 'center';
+    popupOverlay.style.zIndex = '1000';
+
+    const popup = document.createElement('div');
+    popup.style.backgroundColor = 'white';
+    popup.style.padding = '20px';
+    popup.style.borderRadius = '10px';
+    popup.style.textAlign = 'center';
+
+    const message = document.createElement('p');
+    message.textContent = 'おめでとう！すべてのステージをクリアしました！';
+    message.style.marginBottom = '20px';
+
     const restartButton = document.createElement('button');
-    restartButton.textContent = 'Restart Game';
-    restartButton.addEventListener('click', restartGame);
-    gameContainer.appendChild(restartButton);
+    restartButton.textContent = 'もう一度挑戦する';
+    restartButton.style.padding = '10px 20px';
+    restartButton.style.fontSize = '16px';
+    restartButton.style.cursor = 'pointer';
+    restartButton.addEventListener('click', () => {
+        document.body.removeChild(popupOverlay);
+        restartGame();
+    });
+
+    popup.appendChild(message);
+    popup.appendChild(restartButton);
+    popupOverlay.appendChild(popup);
+    document.body.appendChild(popupOverlay);
 }
 
 function playCelebrationSound() {
