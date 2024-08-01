@@ -9,7 +9,7 @@ if (!gameContainer) {
 }
 
 const gameManager = new GameManager(gameContainer);
-gameManager.setDebugMode(false); // デバッグモードを有効化（必要に応じてfalseに設定）
+gameManager.setDebugMode(true); // デバッグモードを有効化（必要に応じてfalseに設定）
 
 const stages = [Stage01SimplePop, Stage02SimplePop];
 let currentStageIndex = 0;
