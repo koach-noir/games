@@ -1,17 +1,17 @@
-import Balloon from '../modules/balloon.js';
+import Balloon from '../modules/enhanced-balloon.js';
 
 export default class Stage01SimplePop {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.gameContainer = gameManager.getGameContainer();
-        this.balloonCount = 10;
+        this.balloonCount = 7;
         this.balloons = [];
         this.clearCondition = 10;
         this.eventListeners = [];
     }
 
     start() {
-        this.cleanup(); // 開始前にクリーンアップを実行
+        this.cleanup();
         this.createBalloons();
         this.gameManager.showStageNotification("Stage 1: Pop 10 balloons!");
     }
@@ -25,37 +25,29 @@ export default class Stage01SimplePop {
     createBalloon() {
         const balloon = new Balloon({
             type: this.getRandomBalloonType(),
-            size: 200
+            gameContainer: this.gameContainer
         });
         
-        const left = Math.random() * (this.gameContainer.clientWidth - balloon.size);
-        const top = Math.random() * (this.gameContainer.clientHeight - balloon.size);
+        const left = Math.random() * (this.gameContainer.clientWidth - 100);
+        const top = Math.random() * (this.gameContainer.clientHeight - 100);
         balloon.setPosition(left, top);
 
-        const clickHandler = () => this.popBalloon(balloon);
-        balloon.element.addEventListener('click', clickHandler);
-        this.eventListeners.push({ element: balloon.element, type: 'click', handler: clickHandler });
+        const popHandler = () => this.onBalloonPopped(balloon);
+        balloon.element.addEventListener('popped', popHandler);
+        this.eventListeners.push({ element: balloon.element, type: 'popped', handler: popHandler });
         
         this.gameContainer.appendChild(balloon.element);
         this.balloons.push(balloon);
     }
 
-    popBalloon(balloon) {
-        balloon.pop();
+    onBalloonPopped(balloon) {
         this.gameManager.incrementScore();
-        
-        setTimeout(() => {
-            this.removeBalloon(balloon);
-            this.createBalloon();
-        }, 300);
+        this.removeBalloon(balloon);
+        this.createBalloon();
     }
 
     removeBalloon(balloon) {
-        if (this.gameContainer.contains(balloon.element)) {
-            this.gameContainer.removeChild(balloon.element);
-        }
         this.balloons = this.balloons.filter(b => b !== balloon);
-        // イベントリスナーを削除
         const listenerIndex = this.eventListeners.findIndex(
             listener => listener.element === balloon.element
         );
@@ -72,17 +64,18 @@ export default class Stage01SimplePop {
     }
 
     cleanup() {
-        // 全ての風船を削除
-        this.balloons.forEach(balloon => this.removeBalloon(balloon));
+        this.balloons.forEach(balloon => {
+            if (balloon.element.parentNode) {
+                balloon.element.parentNode.removeChild(balloon.element);
+            }
+        });
         this.balloons = [];
 
-        // 残っているイベントリスナーを削除
         this.eventListeners.forEach(({ element, type, handler }) => {
             element.removeEventListener(type, handler);
         });
         this.eventListeners = [];
 
-        // ゲームコンテナをクリア
         while (this.gameContainer.firstChild) {
             this.gameContainer.removeChild(this.gameContainer.firstChild);
         }
