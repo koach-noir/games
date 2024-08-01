@@ -34,7 +34,7 @@ export default class Balloon {
     pop() {
         this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
         this.element.classList.add('popped');
-        //this.playPopSound();
+        this.playPopSound();
         this.stopAllIntervals();
         
         // ポップイベントをディスパッチ
