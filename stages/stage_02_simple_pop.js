@@ -1,4 +1,4 @@
-import Balloon from '../modules/enhanced-balloon.js';
+import Balloon from '../modules/balloon.js';
 
 export default class Stage02SimplePop {
     constructor(gameManager) {
