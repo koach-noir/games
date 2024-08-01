@@ -56,6 +56,7 @@ export default class Balloon {
     handleTouchStart(event) {
         event.preventDefault();
         this.isBeingTouched = true;
+        this.checkPop();
         this.inflate();
         this.bounce();
         this.longPressTimer = setTimeout(() => {
@@ -78,7 +79,6 @@ export default class Balloon {
             this.size += 20;
         }
         this.updateSize();
-        this.checkPop();
     }
 
     continuousInflate() {
