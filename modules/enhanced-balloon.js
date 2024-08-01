@@ -6,11 +6,12 @@ export default class Balloon {
         this.id = Math.random().toString(36).substr(2, 9);
         this.size = 100;
         this.element = this.createElement();
+        console.log(`[Balloon] Background image:`, window.getComputedStyle(this.element).backgroundImage);
         this.isBeingTouched = false;
         this.longPressTimer = null;
         this.shrinkInterval = null;
         this.wobbleInterval = null;
-
+        
         this.setupEventListeners();
         this.startWobbling();
         this.startShrinking();
