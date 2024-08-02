@@ -17,7 +17,7 @@ export default class OperationManager {
         const toggleSwitch = document.createElement('div');
         toggleSwitch.id = 'toggle-switch';
         toggleSwitch.style.cssText = `
-            position: absolute;
+            position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
@@ -25,21 +25,28 @@ export default class OperationManager {
             height: 60px;
             background-size: contain;
             background-repeat: no-repeat;
+            background-position: center;
             cursor: pointer;
+            border: 2px solid black;
+            border-radius: 50%;
+            background-color: white;
         `;
-        toggleSwitch.addEventListener('dblclick', this.cycleMode.bind(this));
+        toggleSwitch.addEventListener('click', this.cycleMode.bind(this));
         return toggleSwitch;
+    }
+    
+    updateToggleSwitchImage() {
+        if (this.toggleSwitch) {
+            this.toggleSwitch.style.backgroundImage = `url('resources/common/operation_${this.getCurrentMode()}.gif')`;
+            console.log('Updated toggle switch image:', this.getCurrentMode());
+        } else {
+            console.error('Toggle switch element not found');
+        }
     }
 
     cycleMode() {
         this.currentModeIndex = (this.currentModeIndex + 1) % this.modes.length;
         this.updateToggleSwitchImage();
-    }
-
-    updateToggleSwitchImage() {
-        if (this.toggleSwitch) {
-            this.toggleSwitch.style.backgroundImage = `url('resources/common/operation_${this.getCurrentMode()}.gif')`;
-        }
     }
 
     getCurrentMode() {
