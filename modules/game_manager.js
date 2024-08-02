@@ -8,7 +8,7 @@ export default class GameManager {
         this.score = 0;
         this.onStageClear = null;
         this.celebrationAudio = null;
-        this.debug = false; // デバッグモードのフラグ
+        this.debug = false;
     }
 
     setCurrentStage(stage) {
@@ -72,17 +72,15 @@ export default class GameManager {
         }, 3000);
     }
 
+    clearContainer() {
+        while (this.gameContainer.firstChild) {
+            this.gameContainer.removeChild(this.gameContainer.firstChild);
+        }
+    }
+
     reset() {
         this.score = 0;
-        
-        // トグルスイッチを除外してゲームコンテナをクリア
-        const children = Array.from(this.gameContainer.children);
-        children.forEach(child => {
-            if (child.id !== 'toggle-switch') {
-                this.gameContainer.removeChild(child);
-            }
-        });
-    
+        this.clearContainer();
         if (this.currentStage) {
             this.currentStage.cleanup();
         }
@@ -91,13 +89,11 @@ export default class GameManager {
         this.log('Game manager reset');
     }
 
-    // デバッグモードの切り替え
     setDebugMode(isDebug) {
         this.debug = isDebug;
         this.log(`Debug mode ${isDebug ? 'enabled' : 'disabled'}`);
     }
 
-    // ログ出力用のメソッド
     log(message, level = 'log') {
         if (this.debug) {
             console[level](`[GameManager] ${message}`);

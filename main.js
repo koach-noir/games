@@ -3,27 +3,22 @@ import OperationManager from './modules/operation.js';
 import Stage01SimplePop from './stages/stage_01_simple_pop.js';
 import Stage02SimplePop from './stages/stage_02_simple_pop.js';
 
-console.log('main.js executed');
-
 let gameManager, operationManager;
 const stages = [Stage01SimplePop, Stage02SimplePop];
 let currentStageIndex = 0;
 
 function initGame() {
-    console.log('Initializing game');
     const gameContainer = document.getElementById('game-container');
     if (!gameContainer) {
         console.error('Game container not found');
         throw new Error('Game container not found');
     }
 
-    console.log('gameContainer:', gameContainer);
-
     gameManager = new GameManager(gameContainer);
-    gameManager.setDebugMode(true); // デバッグモードを有効化（必要に応じてfalseに設定）
+    gameManager.setDebugMode(true);
 
-    operationManager = new OperationManager(gameContainer);
-    console.log('OperationManager instantiated');
+    operationManager = new OperationManager();
+    operationManager.initToggleSwitch();
 
     gameManager.onStageClear = startNextStage;
     startNextStage();
@@ -31,17 +26,8 @@ function initGame() {
 
 function startNextStage() {
     if (currentStageIndex < stages.length) {
-        const container = gameManager.getGameContainer();
-        if (container) {
-            // トグルスイッチを除外してコンテナをクリア
-            Array.from(container.children).forEach(child => {
-                if (child.id !== 'toggle-switch') {
-                    container.removeChild(child);
-                }
-            });
-        }
+        gameManager.clearContainer();
         
-        // 1秒のディレイを追加
         setTimeout(() => {
             const StageClass = stages[currentStageIndex];
             const stage = new StageClass(gameManager, operationManager);
@@ -146,32 +132,4 @@ function restartGame() {
     startNextStage();
 }
 
-// DOMの読み込みが完了したらゲームを初期化
 document.addEventListener('DOMContentLoaded', initGame);
-
-// ページの読み込みが完了したらトグルスイッチの存在を確認
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const toggleSwitch = document.getElementById('toggle-switch');
-        if (!toggleSwitch) {
-            console.error('Toggle switch not found after page load, creating a new one');
-            const newToggleSwitch = document.createElement('div');
-            newToggleSwitch.id = 'toggle-switch';
-            newToggleSwitch.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 80px;
-                height: 80px;
-                background-color: yellow;
-                border: 4px solid red;
-                border-radius: 50%;
-                z-index: 9999;
-            `;
-            document.body.appendChild(newToggleSwitch);
-        } else {
-            console.log('Toggle switch found after page load:', toggleSwitch);
-        }
-    }, 1000);
-});
