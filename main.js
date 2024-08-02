@@ -132,3 +132,16 @@ gameManager.onStageClear = startNextStage;
 
 // ページの読み込みが完了したらゲームを開始
 window.addEventListener('load', startNextStage);
+
+console.log('main.js executed');
+window.addEventListener('DOMContentLoaded', (event) => {
+    console.log('DOM fully loaded and parsed');
+    const gameContainer = document.getElementById('game-container');
+    console.log('gameContainer:', gameContainer);
+    if (gameContainer) {
+        const operationManager = new OperationManager(gameContainer);
+        console.log('OperationManager instantiated');
+    } else {
+        console.error('game-container not found');
+    }
+});

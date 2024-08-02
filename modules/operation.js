@@ -13,8 +13,15 @@ export default class OperationManager {
         this.toggleSwitch = this.createToggleSwitch();
         if (this.toggleSwitch) {
             console.log('Toggle switch created successfully');
-            this.gameContainer.appendChild(this.toggleSwitch);
-            console.log('Toggle switch appended to gameContainer');
+            console.log('gameContainer:', this.gameContainer);
+            if (this.gameContainer) {
+                this.gameContainer.appendChild(this.toggleSwitch);
+                console.log('Toggle switch appended to gameContainer');
+            } else {
+                console.error('gameContainer is null or undefined');
+                document.body.appendChild(this.toggleSwitch);
+                console.log('Toggle switch appended to body as fallback');
+            }
             this.updateToggleSwitchImage();
         } else {
             console.error('Failed to create toggle switch');
