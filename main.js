@@ -33,7 +33,12 @@ function startNextStage() {
     if (currentStageIndex < stages.length) {
         const container = gameManager.getGameContainer();
         if (container) {
-            container.innerHTML = ''; // コンテナをクリア
+            // トグルスイッチを除外してコンテナをクリア
+            Array.from(container.children).forEach(child => {
+                if (child.id !== 'toggle-switch') {
+                    container.removeChild(child);
+                }
+            });
         }
         
         // 1秒のディレイを追加

@@ -1,6 +1,5 @@
 export default class OperationManager {
     constructor(gameContainer) {
-        console.log('OperationManager constructor called');
         this.gameContainer = gameContainer;
         this.modes = ['rock', 'scissors', 'paper'];
         this.currentModeIndex = 0;
@@ -9,27 +8,12 @@ export default class OperationManager {
     }
 
     initToggleSwitch() {
-        console.log('initToggleSwitch called');
         this.toggleSwitch = this.createToggleSwitch();
-        if (this.toggleSwitch) {
-            console.log('Toggle switch created successfully');
-            console.log('gameContainer:', this.gameContainer);
-            if (this.gameContainer) {
-                this.gameContainer.appendChild(this.toggleSwitch);
-                console.log('Toggle switch appended to gameContainer');
-            } else {
-                console.error('gameContainer is null or undefined');
-                document.body.appendChild(this.toggleSwitch);
-                console.log('Toggle switch appended to body as fallback');
-            }
-            this.updateToggleSwitchImage();
-        } else {
-            console.error('Failed to create toggle switch');
-        }
+        document.body.appendChild(this.toggleSwitch);
+        this.updateToggleSwitchImage();
     }
 
     createToggleSwitch() {
-        console.log('createToggleSwitch called');
         const toggleSwitch = document.createElement('div');
         toggleSwitch.id = 'toggle-switch';
         toggleSwitch.style.cssText = `
