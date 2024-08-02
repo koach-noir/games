@@ -1,7 +1,6 @@
 export default class Balloon {
     constructor(config) {
-        this.initialSize = config.size || 100;
-        this.size = this.initialSize;
+        this.size = config.size || 100;
         this.type = config.type || 'b01';
         this.gameContainer = config.gameContainer;
         this.id = Math.random().toString(36).slice(2, 11);
@@ -11,9 +10,6 @@ export default class Balloon {
         this.shrinkInterval = null;
         this.wobbleInterval = null;
         this.isPopped = false;
-        this.velocity = { x: 0, y: 0 };
-        this.lastPosition = { x: 0, y: 0 };
-        this.friction = 0.95; // 摩擦係数
 
         this.setupEventListeners();
         this.startWobbling();
@@ -40,29 +36,32 @@ export default class Balloon {
         if (this.isPopped) return;
         this.isPopped = true;
     
+        // 画像を変更
         this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
+        
+        // アニメーションのための準備
         this.element.style.transition = 'all 0.3s ease';
         
+        // 少し遅延させてからアニメーションを開始
         setTimeout(() => {
             this.element.classList.add('popped');
+            
+            // 音を再生
             this.playPopSound();
+            
+            // すべてのインターバルを停止
             this.stopAllIntervals();
+            
+            // ポップイベントをディスパッチ
             this.element.dispatchEvent(new Event('popped'));
     
+            // アニメーション完了後に要素を削除
             setTimeout(() => {
                 if (this.element.parentNode) {
                     this.element.parentNode.removeChild(this.element);
                 }
-            }, 300);
-        }, 50);
-    }
-
-    remove() {
-        if (this.element.parentNode) {
-            this.element.parentNode.removeChild(this.element);
-        }
-        this.stopAllIntervals();
-        this.element.dispatchEvent(new Event('removed'));
+            }, 300); // CSSのtransitionと同じ時間（0.3秒）
+        }, 50); // 50ミリ秒の遅延を追加
     }
 
     playPopSound() {
@@ -75,17 +74,14 @@ export default class Balloon {
         this.element.addEventListener('touchstart', this.handleTouchStart.bind(this));
         this.element.addEventListener('mouseup', this.handleTouchEnd.bind(this));
         this.element.addEventListener('touchend', this.handleTouchEnd.bind(this));
-        this.element.addEventListener('mousemove', this.handleMove.bind(this));
-        this.element.addEventListener('touchmove', this.handleMove.bind(this));
     }
 
     handleTouchStart(event) {
         event.preventDefault();
         this.isBeingTouched = true;
         this.checkPop();
-        this.deflate();
+        this.inflate();
         this.bounce();
-        this.lastPosition = this.getEventPosition(event);
         this.longPressTimer = setTimeout(() => {
             this.continuousInflate();
         }, 300);
@@ -95,42 +91,17 @@ export default class Balloon {
         this.isBeingTouched = false;
         clearTimeout(this.longPressTimer);
         clearInterval(this.continuousInflateInterval);
-        this.applyInertia();
-    }
-
-    handleMove(event) {
-        if (!this.isBeingTouched) return;
-        
-        const currentPosition = this.getEventPosition(event);
-        
-        this.velocity.x = currentPosition.x - this.lastPosition.x;
-        this.velocity.y = currentPosition.y - this.lastPosition.y;
-        
-        this.lastPosition = currentPosition;
-    }
-
-    getEventPosition(event) {
-        const touch = event.touches ? event.touches[0] : event;
-        return {
-            x: touch.clientX,
-            y: touch.clientY
-        };
-    }
-
-    deflate() {
-        this.size = Math.max(this.initialSize / 8, this.size - 20);
-        this.updateSize();
-        if (this.size <= this.initialSize / 8) {
-            this.remove();
-        }
     }
 
     inflate() {
-        this.size = Math.min(this.initialSize * 2, this.size + 20);
-        this.updateSize();
-        if (this.size >= this.initialSize * 2) {
-            this.pop();
+        if (this.size < 100) {
+            this.size += 20;
+        } else if (this.size < 180) {
+            this.size += 30;
+        } else {
+            this.size += 20;
         }
+        this.updateSize();
     }
 
     continuousInflate() {
@@ -154,12 +125,16 @@ export default class Balloon {
 
     startShrinking() {
         this.shrinkInterval = setInterval(() => {
-            if (!this.isBeingTouched && this.size > this.initialSize) {
-                this.size -= 5;
+            if (!this.isBeingTouched && this.size > 100) {
+                if (this.size > 180) {
+                    this.size -= 10;
+                } else {
+                    this.size -= 5;
+                }
                 this.updateSize();
             }
-            if (this.size <= this.initialSize / 8) {
-                this.remove();
+            if (this.size <= 10) {
+                this.pop();
             }
         }, 100);
     }
@@ -168,7 +143,7 @@ export default class Balloon {
         let wobbleAmount = 0;
         this.wobbleInterval = setInterval(() => {
             wobbleAmount = Math.sin(Date.now() / 1000) * 5;
-            this.element.style.transform = `scale(${this.size / this.initialSize}) translate(${wobbleAmount}px, ${wobbleAmount}px)`;
+            this.element.style.transform = `scale(${this.size / 100}) translate(${wobbleAmount}px, ${wobbleAmount}px)`;
         }, 50);
     }
 
@@ -178,28 +153,13 @@ export default class Balloon {
     }
 
     checkPop() {
-        if (this.size >= this.initialSize * 2) {
-            this.pop();
+        if (this.size >= 200) {
+            setTimeout(() => {
+                if (this.size >= 200) {
+                    this.pop();
+                }
+            }, 1000);
         }
-    }
-
-    applyInertia() {
-        const inertiaInterval = setInterval(() => {
-            this.velocity.x *= this.friction;
-            this.velocity.y *= this.friction;
-            
-            const currentLeft = parseInt(this.element.style.left);
-            const currentTop = parseInt(this.element.style.top);
-            
-            this.setPosition(
-                currentLeft + this.velocity.x,
-                currentTop + this.velocity.y
-            );
-            
-            if (Math.abs(this.velocity.x) < 0.1 && Math.abs(this.velocity.y) < 0.1) {
-                clearInterval(inertiaInterval);
-            }
-        }, 16); // 約60FPS
     }
 
     stopAllIntervals() {
