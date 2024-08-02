@@ -11,8 +11,10 @@ export default class Balloon {
         this.wobbleInterval = null;
         this.isPopped = false;
         this.isDragging = false;
+        this.dragStartTime = 0;
         this.startX = 0;
         this.startY = 0;
+        this.lastTapTime = 0;
 
         this.setupEventListeners();
         this.startWobbling();
@@ -27,7 +29,6 @@ export default class Balloon {
         balloon.style.backgroundImage = `url('resources/balloon/${this.type}.png')`;
         balloon.style.position = 'absolute';
         balloon.style.transition = 'transform 0.3s ease';
-        balloon.style.cursor = 'move';
         return balloon;
     }
 
@@ -37,21 +38,20 @@ export default class Balloon {
     }
 
     setupEventListeners() {
-        this.element.addEventListener('mousedown', this.handleDragStart.bind(this));
-        this.element.addEventListener('touchstart', this.handleDragStart.bind(this));
-        document.addEventListener('mousemove', this.handleDragMove.bind(this));
-        document.addEventListener('touchmove', this.handleDragMove.bind(this));
-        document.addEventListener('mouseup', this.handleDragEnd.bind(this));
-        document.addEventListener('touchend', this.handleDragEnd.bind(this));
+        this.element.addEventListener('mousedown', this.handleTouchStart.bind(this));
+        this.element.addEventListener('touchstart', this.handleTouchStart.bind(this));
+        document.addEventListener('mousemove', this.handleTouchMove.bind(this));
+        document.addEventListener('touchmove', this.handleTouchMove.bind(this));
+        document.addEventListener('mouseup', this.handleTouchEnd.bind(this));
+        document.addEventListener('touchend', this.handleTouchEnd.bind(this));
     }
 
-    handleDragStart(event) {
+    handleTouchStart(event) {
         if (this.isPopped) return;
         event.preventDefault();
-        this.isDragging = true;
         this.isBeingTouched = true;
-        this.element.style.transition = 'none';
-        
+        this.dragStartTime = Date.now();
+
         if (event.type === 'mousedown') {
             this.startX = event.clientX - this.element.offsetLeft;
             this.startY = event.clientY - this.element.offsetTop;
@@ -61,14 +61,22 @@ export default class Balloon {
         }
 
         this.longPressTimer = setTimeout(() => {
+            this.isDragging = true;
+            this.element.style.cursor = 'move';
+        }, 500); // 500ミリ秒の長押しでドラッグモードに入る
+
+        // ダブルタップ検出
+        const currentTime = Date.now();
+        if (currentTime - this.lastTapTime < 300) { // 300ミリ秒以内の2回のタップ
             this.inflate();
-        }, 300);
+        }
+        this.lastTapTime = currentTime;
     }
 
-    handleDragMove(event) {
-        if (!this.isDragging) return;
+    handleTouchMove(event) {
+        if (!this.isBeingTouched) return;
         event.preventDefault();
-        
+
         let clientX, clientY;
         if (event.type === 'mousemove') {
             clientX = event.clientX;
@@ -78,18 +86,31 @@ export default class Balloon {
             clientY = event.touches[0].clientY;
         }
 
-        const newX = clientX - this.startX;
-        const newY = clientY - this.startY;
-
-        this.setPosition(newX, newY);
+        if (this.isDragging) {
+            const newX = clientX - this.startX;
+            const newY = clientY - this.startY;
+            this.setPosition(newX, newY);
+        } else {
+            // タップしてすぐの移動は無視（小さな動きは許容）
+            const moveX = Math.abs(clientX - (this.startX + this.element.offsetLeft));
+            const moveY = Math.abs(clientY - (this.startY + this.element.offsetTop));
+            if (moveX > 10 || moveY > 10) {
+                clearTimeout(this.longPressTimer);
+            }
+        }
     }
 
-    handleDragEnd() {
-        if (!this.isDragging) return;
-        this.isDragging = false;
+    handleTouchEnd() {
         this.isBeingTouched = false;
-        this.element.style.transition = 'transform 0.3s ease';
+        this.isDragging = false;
+        this.element.style.cursor = 'pointer';
         clearTimeout(this.longPressTimer);
+
+        // タップ時の挙動（短い接触時間の場合）
+        if (Date.now() - this.dragStartTime < 200) {
+            this.inflate();
+            this.bounce();
+        }
     }
 
     inflate() {
@@ -101,6 +122,19 @@ export default class Balloon {
             this.size += 20;
         }
         this.updateSize();
+    }
+
+    bounce() {
+        const directions = [
+            {x: -1, y: -1}, {x: 0, y: -1}, {x: 1, y: -1},
+            {x: -1, y: 0}, {x: 1, y: 0},
+            {x: -1, y: 1}, {x: 0, y: 1}, {x: 1, y: 1}
+        ];
+        const direction = directions[Math.floor(Math.random() * directions.length)];
+        const currentLeft = parseInt(this.element.style.left);
+        const currentTop = parseInt(this.element.style.top);
+        
+        this.setPosition(currentLeft + direction.x * 10, currentTop + direction.y * 10);
     }
 
     updateSize() {
@@ -120,7 +154,7 @@ export default class Balloon {
 
     startShrinking() {
         this.shrinkInterval = setInterval(() => {
-            if (!this.isBeingTouched && !this.isDragging && this.size > 100) {
+            if (!this.isBeingTouched && this.size > 100) {
                 if (this.size > 180) {
                     this.size -= 10;
                 } else {
