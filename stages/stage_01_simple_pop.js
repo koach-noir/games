@@ -26,6 +26,7 @@ export default class Stage01SimplePop {
     createBalloon() {
         const balloon = new Balloon({
             type: this.getRandomBalloonType(),
+            size: 200,
             gameContainer: this.gameContainer
         });
         
