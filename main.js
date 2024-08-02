@@ -1,4 +1,5 @@
 import GameManager from './modules/game_manager.js';
+import OperationManager from './modules/operation.js';
 import Stage01SimplePop from './stages/stage_01_simple_pop.js';
 import Stage02SimplePop from './stages/stage_02_simple_pop.js';
 
@@ -9,6 +10,7 @@ if (!gameContainer) {
 }
 
 const gameManager = new GameManager(gameContainer);
+const operationManager = new OperationManager(gameContainer);
 gameManager.setDebugMode(true); // デバッグモードを有効化（必要に応じてfalseに設定）
 
 const stages = [Stage01SimplePop, Stage02SimplePop];
@@ -24,7 +26,7 @@ function startNextStage() {
         // 1秒のディレイを追加
         setTimeout(() => {
             const StageClass = stages[currentStageIndex];
-            const stage = new StageClass(gameManager);
+            const stage = new StageClass(gameManager, operationManager);
             gameManager.setCurrentStage(stage);
             stage.start();
             currentStageIndex++;

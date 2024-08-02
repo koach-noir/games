@@ -26,3 +26,7 @@ body {
     pointer-events: none;
     transition: all 0.3s ease;
 }
+
+#toggle-switch {
+    z-index: 1000;
+}

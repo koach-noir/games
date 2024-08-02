@@ -1,19 +1,20 @@
 import Balloon from '../modules/balloon.js';
 
 export default class Stage02SimplePop {
-    constructor(gameManager) {
+    constructor(gameManager, operationManager) {
         this.gameManager = gameManager;
+        this.operationManager = operationManager;
         this.gameContainer = gameManager.getGameContainer();
         this.balloonCount = 3;
         this.balloons = [];
-        this.clearCondition = 5;
+        this.clearCondition = 10;
         this.eventListeners = [];
     }
 
     start() {
         this.cleanup();
         this.createBalloons();
-        this.gameManager.showStageNotification("Stage 2: Pop 5 balloons!");
+        this.gameManager.showStageNotification("Stage 2: Pop 10 balloons!");
     }
 
     createBalloons() {
@@ -23,7 +24,6 @@ export default class Stage02SimplePop {
     }
 
     createBalloon() {
-        console.log('[Stage] Starting to create a new balloon');
         const balloon = new Balloon({
             type: this.getRandomBalloonType(),
             gameContainer: this.gameContainer
@@ -33,12 +33,31 @@ export default class Stage02SimplePop {
         const top = Math.random() * (this.gameContainer.clientHeight - 100);
         balloon.setPosition(left, top);
 
-        const popHandler = () => this.onBalloonPopped(balloon);
-        balloon.element.addEventListener('popped', popHandler);
-        this.eventListeners.push({ element: balloon.element, type: 'popped', handler: popHandler });
+        const interactionHandler = (e) => this.handleBalloonInteraction(balloon, e.detail.event);
+        balloon.element.addEventListener('balloonInteraction', interactionHandler);
+        this.eventListeners.push({ element: balloon.element, type: 'balloonInteraction', handler: interactionHandler });
+
+        const poppedHandler = () => this.onBalloonPopped(balloon);
+        balloon.element.addEventListener('popped', poppedHandler);
+        this.eventListeners.push({ element: balloon.element, type: 'popped', handler: poppedHandler });
         
         this.gameContainer.appendChild(balloon.element);
         this.balloons.push(balloon);
+    }
+
+    handleBalloonInteraction(balloon, event) {
+        const currentMode = this.operationManager.getCurrentMode();
+        switch (currentMode) {
+            case 'scissors':
+                this.operationManager.balloon_scissors(balloon);
+                break;
+            case 'paper':
+                this.operationManager.balloon_paper(balloon, event);
+                break;
+            case 'rock':
+                this.operationManager.balloon_rock(balloon, event);
+                break;
+        }
     }
 
     onBalloonPopped(balloon) {
@@ -49,14 +68,7 @@ export default class Stage02SimplePop {
 
     removeBalloon(balloon) {
         this.balloons = this.balloons.filter(b => b !== balloon);
-        const listenerIndex = this.eventListeners.findIndex(
-            listener => listener.element === balloon.element
-        );
-        if (listenerIndex !== -1) {
-            const { element, type, handler } = this.eventListeners[listenerIndex];
-            element.removeEventListener(type, handler);
-            this.eventListeners.splice(listenerIndex, 1);
-        }
+        this.eventListeners = this.eventListeners.filter(listener => listener.element !== balloon.element);
     }
 
     getRandomBalloonType() {
