@@ -74,7 +74,15 @@ export default class GameManager {
 
     reset() {
         this.score = 0;
-        this.gameContainer.innerHTML = '';
+        
+        // トグルスイッチを除外してゲームコンテナをクリア
+        const children = Array.from(this.gameContainer.children);
+        children.forEach(child => {
+            if (child.id !== 'toggle-switch') {
+                this.gameContainer.removeChild(child);
+            }
+        });
+    
         if (this.currentStage) {
             this.currentStage.cleanup();
         }
