@@ -1,5 +1,6 @@
 export default class OperationManager {
     constructor(gameContainer) {
+        console.log('OperationManager constructor called');
         this.gameContainer = gameContainer;
         this.modes = ['rock', 'scissors', 'paper'];
         this.currentModeIndex = 0;
@@ -8,12 +9,20 @@ export default class OperationManager {
     }
 
     initToggleSwitch() {
+        console.log('initToggleSwitch called');
         this.toggleSwitch = this.createToggleSwitch();
-        this.gameContainer.appendChild(this.toggleSwitch);
-        this.updateToggleSwitchImage();
+        if (this.toggleSwitch) {
+            console.log('Toggle switch created successfully');
+            this.gameContainer.appendChild(this.toggleSwitch);
+            console.log('Toggle switch appended to gameContainer');
+            this.updateToggleSwitchImage();
+        } else {
+            console.error('Failed to create toggle switch');
+        }
     }
 
     createToggleSwitch() {
+        console.log('createToggleSwitch called');
         const toggleSwitch = document.createElement('div');
         toggleSwitch.id = 'toggle-switch';
         toggleSwitch.style.cssText = `
@@ -32,12 +41,16 @@ export default class OperationManager {
             background-color: white;
         `;
         toggleSwitch.addEventListener('click', this.cycleMode.bind(this));
+        console.log('Toggle switch element created');
         return toggleSwitch;
     }
     
     updateToggleSwitchImage() {
+        console.log('updateToggleSwitchImage called');
         if (this.toggleSwitch) {
-            this.toggleSwitch.style.backgroundImage = `url('resources/common/operation_${this.getCurrentMode()}.gif')`;
+            const imageUrl = `resources/common/operation_${this.getCurrentMode()}.gif`;
+            console.log('Setting background image:', imageUrl);
+            this.toggleSwitch.style.backgroundImage = `url('${imageUrl}')`;
             console.log('Updated toggle switch image:', this.getCurrentMode());
         } else {
             console.error('Toggle switch element not found');
