@@ -1,3 +1,5 @@
+import { BalloonBehavior } from './balloon_behavior.js';
+
 export default class Balloon {
     constructor(config) {
         this.size = config.size || 100;
@@ -6,6 +8,7 @@ export default class Balloon {
         this.id = Math.random().toString(36).slice(2, 11);
         this.element = this.createElement();
         this.isPopped = false;
+        this.behavior = new BalloonBehavior(this);
 
         this.setupEventListeners();
     }
@@ -81,5 +84,18 @@ export default class Balloon {
         };
 
         requestAnimationFrame(move);
+    }
+
+    startFloating() {
+        this.behavior.startFloating();
+    }
+
+    stopFloating() {
+        this.behavior.stopFloating();
+    }
+
+    cleanup() {
+        this.behavior.cleanup();
+        // 他の必要なクリーンアップ処理
     }
 }

@@ -43,6 +43,7 @@ export default class Stage02SimplePop {
         
         this.gameContainer.appendChild(balloon.element);
         this.balloons.push(balloon);
+        balloon.startFloating();
     }
 
     handleBalloonInteraction(balloon, event) {
@@ -67,6 +68,7 @@ export default class Stage02SimplePop {
     }
 
     removeBalloon(balloon) {
+        balloon.cleanup();
         this.balloons = this.balloons.filter(b => b !== balloon);
         this.eventListeners = this.eventListeners.filter(listener => listener.element !== balloon.element);
     }
@@ -78,6 +80,7 @@ export default class Stage02SimplePop {
 
     cleanup() {
         this.balloons.forEach(balloon => {
+            balloon.cleanup();
             if (balloon.element.parentNode) {
                 balloon.element.parentNode.removeChild(balloon.element);
             }
