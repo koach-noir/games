@@ -6,32 +6,13 @@ export default class OperationManager {
     }
 
     initToggleSwitch() {
-        this.toggleSwitch = this.createToggleSwitch();
-        document.body.appendChild(this.toggleSwitch);
+        this.toggleSwitch = document.getElementById('toggle-switch');
+        if (!this.toggleSwitch) {
+            console.error('Toggle switch element not found');
+            return;
+        }
+        this.toggleSwitch.addEventListener('click', this.cycleMode.bind(this));
         this.updateToggleSwitchImage();
-    }
-
-    createToggleSwitch() {
-        const toggleSwitch = document.createElement('div');
-        toggleSwitch.id = 'toggle-switch';
-        toggleSwitch.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 80px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            cursor: pointer;
-            border: 4px solid red;
-            border-radius: 50%;
-            background-color: yellow;
-            z-index: 9999;
-        `;
-        toggleSwitch.addEventListener('click', this.cycleMode.bind(this));
-        return toggleSwitch;
     }
 
     cycleMode() {
