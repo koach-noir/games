@@ -10,6 +10,9 @@ export default class Balloon {
         this.shrinkInterval = null;
         this.wobbleInterval = null;
         this.isPopped = false;
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
 
         this.setupEventListeners();
         this.startWobbling();
@@ -24,6 +27,7 @@ export default class Balloon {
         balloon.style.backgroundImage = `url('resources/balloon/${this.type}.png')`;
         balloon.style.position = 'absolute';
         balloon.style.transition = 'transform 0.3s ease';
+        balloon.style.cursor = 'move';
         return balloon;
     }
 
@@ -32,65 +36,60 @@ export default class Balloon {
         this.element.style.top = `${y}px`;
     }
 
-    pop() {
-        if (this.isPopped) return;
-        this.isPopped = true;
-    
-        // 画像を変更
-        this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
-        
-        // アニメーションのための準備
-        this.element.style.transition = 'all 0.3s ease';
-        
-        // 少し遅延させてからアニメーションを開始
-        setTimeout(() => {
-            this.element.classList.add('popped');
-            
-            // 音を再生
-            this.playPopSound();
-            
-            // すべてのインターバルを停止
-            this.stopAllIntervals();
-            
-            // ポップイベントをディスパッチ
-            this.element.dispatchEvent(new Event('popped'));
-    
-            // アニメーション完了後に要素を削除
-            setTimeout(() => {
-                if (this.element.parentNode) {
-                    this.element.parentNode.removeChild(this.element);
-                }
-            }, 300); // CSSのtransitionと同じ時間（0.3秒）
-        }, 50); // 50ミリ秒の遅延を追加
-    }
-
-    playPopSound() {
-        const audio = new Audio(`resources/balloon/${this.type}_pop.mp3`);
-        audio.play().catch(error => console.error('Error playing audio:', error));
-    }
-
     setupEventListeners() {
-        this.element.addEventListener('mousedown', this.handleTouchStart.bind(this));
-        this.element.addEventListener('touchstart', this.handleTouchStart.bind(this));
-        this.element.addEventListener('mouseup', this.handleTouchEnd.bind(this));
-        this.element.addEventListener('touchend', this.handleTouchEnd.bind(this));
+        this.element.addEventListener('mousedown', this.handleDragStart.bind(this));
+        this.element.addEventListener('touchstart', this.handleDragStart.bind(this));
+        document.addEventListener('mousemove', this.handleDragMove.bind(this));
+        document.addEventListener('touchmove', this.handleDragMove.bind(this));
+        document.addEventListener('mouseup', this.handleDragEnd.bind(this));
+        document.addEventListener('touchend', this.handleDragEnd.bind(this));
     }
 
-    handleTouchStart(event) {
+    handleDragStart(event) {
+        if (this.isPopped) return;
         event.preventDefault();
+        this.isDragging = true;
         this.isBeingTouched = true;
-        this.checkPop();
-        this.inflate();
-        this.bounce();
+        this.element.style.transition = 'none';
+        
+        if (event.type === 'mousedown') {
+            this.startX = event.clientX - this.element.offsetLeft;
+            this.startY = event.clientY - this.element.offsetTop;
+        } else if (event.type === 'touchstart') {
+            this.startX = event.touches[0].clientX - this.element.offsetLeft;
+            this.startY = event.touches[0].clientY - this.element.offsetTop;
+        }
+
         this.longPressTimer = setTimeout(() => {
-            this.continuousInflate();
+            this.inflate();
         }, 300);
     }
 
-    handleTouchEnd() {
+    handleDragMove(event) {
+        if (!this.isDragging) return;
+        event.preventDefault();
+        
+        let clientX, clientY;
+        if (event.type === 'mousemove') {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        } else if (event.type === 'touchmove') {
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        }
+
+        const newX = clientX - this.startX;
+        const newY = clientY - this.startY;
+
+        this.setPosition(newX, newY);
+    }
+
+    handleDragEnd() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
         this.isBeingTouched = false;
+        this.element.style.transition = 'transform 0.3s ease';
         clearTimeout(this.longPressTimer);
-        clearInterval(this.continuousInflateInterval);
     }
 
     inflate() {
@@ -104,28 +103,24 @@ export default class Balloon {
         this.updateSize();
     }
 
-    continuousInflate() {
-        this.continuousInflateInterval = setInterval(() => {
-            this.inflate();
-        }, 300);
+    updateSize() {
+        this.element.style.width = `${this.size}px`;
+        this.element.style.height = `${this.size}px`;
     }
 
-    bounce() {
-        const directions = [
-            {x: -1, y: -1}, {x: 0, y: -1}, {x: 1, y: -1},
-            {x: -1, y: 0}, {x: 1, y: 0},
-            {x: -1, y: 1}, {x: 0, y: 1}, {x: 1, y: 1}
-        ];
-        const direction = directions[Math.floor(Math.random() * directions.length)];
-        const currentLeft = parseInt(this.element.style.left);
-        const currentTop = parseInt(this.element.style.top);
-        
-        this.setPosition(currentLeft + direction.x * 10, currentTop + direction.y * 10);
+    startWobbling() {
+        let wobbleAmount = 0;
+        this.wobbleInterval = setInterval(() => {
+            if (!this.isDragging) {
+                wobbleAmount = Math.sin(Date.now() / 1000) * 5;
+                this.element.style.transform = `translate(${wobbleAmount}px, ${wobbleAmount}px)`;
+            }
+        }, 50);
     }
 
     startShrinking() {
         this.shrinkInterval = setInterval(() => {
-            if (!this.isBeingTouched && this.size > 100) {
+            if (!this.isBeingTouched && !this.isDragging && this.size > 100) {
                 if (this.size > 180) {
                     this.size -= 10;
                 } else {
@@ -139,32 +134,34 @@ export default class Balloon {
         }, 100);
     }
 
-    startWobbling() {
-        let wobbleAmount = 0;
-        this.wobbleInterval = setInterval(() => {
-            wobbleAmount = Math.sin(Date.now() / 1000) * 5;
-            this.element.style.transform = `scale(${this.size / 100}) translate(${wobbleAmount}px, ${wobbleAmount}px)`;
-        }, 50);
-    }
+    pop() {
+        if (this.isPopped) return;
+        this.isPopped = true;
 
-    updateSize() {
-        this.element.style.width = `${this.size}px`;
-        this.element.style.height = `${this.size}px`;
-    }
+        this.element.style.backgroundImage = `url('resources/balloon/${this.type}_pop.png')`;
+        this.element.style.transition = 'all 0.5s ease';
+        
+        setTimeout(() => {
+            this.element.classList.add('popped');
+            this.playPopSound();
+            this.stopAllIntervals();
+            this.element.dispatchEvent(new Event('popped'));
 
-    checkPop() {
-        if (this.size >= 200) {
             setTimeout(() => {
-                if (this.size >= 200) {
-                    this.pop();
+                if (this.element.parentNode) {
+                    this.element.parentNode.removeChild(this.element);
                 }
-            }, 1000);
-        }
+            }, 800);
+        }, 100);
+    }
+
+    playPopSound() {
+        const audio = new Audio(`resources/balloon/${this.type}_pop.mp3`);
+        audio.play().catch(error => console.error('Error playing audio:', error));
     }
 
     stopAllIntervals() {
         clearInterval(this.shrinkInterval);
         clearInterval(this.wobbleInterval);
-        clearInterval(this.continuousInflateInterval);
     }
 }
