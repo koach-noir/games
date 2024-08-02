@@ -52,7 +52,7 @@ export default class OperationManager {
             pointer-events: auto;
         `;
         toggleSwitch.addEventListener('click', this.cycleMode.bind(this));
-        console.log('Toggle switch element created');
+        console.log('Toggle switch element created:', toggleSwitch);
         return toggleSwitch;
     }
     

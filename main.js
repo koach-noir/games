@@ -3,18 +3,31 @@ import OperationManager from './modules/operation.js';
 import Stage01SimplePop from './stages/stage_01_simple_pop.js';
 import Stage02SimplePop from './stages/stage_02_simple_pop.js';
 
-const gameContainer = document.getElementById('game-container');
-if (!gameContainer) {
-    console.error('Game container not found');
-    throw new Error('Game container not found');
-}
+console.log('main.js executed');
 
-const gameManager = new GameManager(gameContainer);
-const operationManager = new OperationManager(gameContainer);
-gameManager.setDebugMode(true); // デバッグモードを有効化（必要に応じてfalseに設定）
-
+let gameManager, operationManager;
 const stages = [Stage01SimplePop, Stage02SimplePop];
 let currentStageIndex = 0;
+
+function initGame() {
+    console.log('Initializing game');
+    const gameContainer = document.getElementById('game-container');
+    if (!gameContainer) {
+        console.error('Game container not found');
+        throw new Error('Game container not found');
+    }
+
+    console.log('gameContainer:', gameContainer);
+
+    gameManager = new GameManager(gameContainer);
+    gameManager.setDebugMode(true); // デバッグモードを有効化（必要に応じてfalseに設定）
+
+    operationManager = new OperationManager(gameContainer);
+    console.log('OperationManager instantiated');
+
+    gameManager.onStageClear = startNextStage;
+    startNextStage();
+}
 
 function startNextStage() {
     if (currentStageIndex < stages.length) {
@@ -128,29 +141,15 @@ function restartGame() {
     startNextStage();
 }
 
-gameManager.onStageClear = startNextStage;
+// DOMの読み込みが完了したらゲームを初期化
+document.addEventListener('DOMContentLoaded', initGame);
 
-// ページの読み込みが完了したらゲームを開始
-window.addEventListener('load', startNextStage);
-
-console.log('main.js executed');
-window.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
-    const gameContainer = document.getElementById('game-container');
-    console.log('gameContainer:', gameContainer);
-    if (gameContainer) {
-        const operationManager = new OperationManager(gameContainer);
-        console.log('OperationManager instantiated');
-    } else {
-        console.error('game-container not found');
-    }
-});
-
+// ページの読み込みが完了したらトグルスイッチの存在を確認
 window.addEventListener('load', () => {
     setTimeout(() => {
         const toggleSwitch = document.getElementById('toggle-switch');
         if (!toggleSwitch) {
-            console.error('Toggle switch not found, creating a new one');
+            console.error('Toggle switch not found after page load, creating a new one');
             const newToggleSwitch = document.createElement('div');
             newToggleSwitch.id = 'toggle-switch';
             newToggleSwitch.style.cssText = `
@@ -167,8 +166,7 @@ window.addEventListener('load', () => {
             `;
             document.body.appendChild(newToggleSwitch);
         } else {
-            console.log('Toggle switch found:', toggleSwitch);
-            document.body.appendChild(toggleSwitch);
+            console.log('Toggle switch found after page load:', toggleSwitch);
         }
     }, 1000);
 });
