@@ -3,8 +3,14 @@ export default class OperationManager {
         this.gameContainer = gameContainer;
         this.modes = ['rock', 'scissors', 'paper'];
         this.currentModeIndex = 0;
+        this.toggleSwitch = null;
+        this.initToggleSwitch();
+    }
+
+    initToggleSwitch() {
         this.toggleSwitch = this.createToggleSwitch();
         this.gameContainer.appendChild(this.toggleSwitch);
+        this.updateToggleSwitchImage();
     }
 
     createToggleSwitch() {
@@ -22,7 +28,6 @@ export default class OperationManager {
             cursor: pointer;
         `;
         toggleSwitch.addEventListener('dblclick', this.cycleMode.bind(this));
-        this.updateToggleSwitchImage();
         return toggleSwitch;
     }
 
@@ -32,7 +37,9 @@ export default class OperationManager {
     }
 
     updateToggleSwitchImage() {
-        this.toggleSwitch.style.backgroundImage = `url('resources/common/operation_${this.getCurrentMode()}.gif')`;
+        if (this.toggleSwitch) {
+            this.toggleSwitch.style.backgroundImage = `url('resources/common/operation_${this.getCurrentMode()}.gif')`;
+        }
     }
 
     getCurrentMode() {
