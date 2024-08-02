@@ -145,3 +145,30 @@ window.addEventListener('DOMContentLoaded', (event) => {
         console.error('game-container not found');
     }
 });
+
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const toggleSwitch = document.getElementById('toggle-switch');
+        if (!toggleSwitch) {
+            console.error('Toggle switch not found, creating a new one');
+            const newToggleSwitch = document.createElement('div');
+            newToggleSwitch.id = 'toggle-switch';
+            newToggleSwitch.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80px;
+                height: 80px;
+                background-color: yellow;
+                border: 4px solid red;
+                border-radius: 50%;
+                z-index: 9999;
+            `;
+            document.body.appendChild(newToggleSwitch);
+        } else {
+            console.log('Toggle switch found:', toggleSwitch);
+            document.body.appendChild(toggleSwitch);
+        }
+    }, 1000);
+});
