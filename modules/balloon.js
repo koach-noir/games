@@ -25,23 +25,9 @@ export default class Balloon {
     }
 
     setPosition(x, y) {
-        const containerRect = this.gameContainer.getBoundingClientRect();
-        const maxX = containerRect.width - this.size;
-        const maxY = containerRect.height - this.size;
-
-        // 風船が壁に触れたら反発する
-        if (x < 0 || x > maxX) {
-            this.velocity.x *= -1;
-            x = x < 0 ? 0 : maxX;
-        }
-        if (y < 0 || y > maxY) {
-            this.velocity.y *= -1;
-            y = y < 0 ? 0 : maxY;
-        }
-
-        this.element.style.left = `${x}px`;
-        this.element.style.top = `${y}px`;
+        this.behavior.setPosition(x, y);
     }
+
     pop() {
         if (this.isPopped) return;
         this.isPopped = true;
@@ -51,7 +37,7 @@ export default class Balloon {
         
         setTimeout(() => {
             this.element.classList.add('popped');
-            this.playPopSound();
+            this.behavior.playPopSound();
             
             this.element.dispatchEvent(new Event('popped'));
     
@@ -61,11 +47,6 @@ export default class Balloon {
                 }
             }, 300);
         }, 50);
-    }
-
-    playPopSound() {
-        const audio = new Audio(`resources/balloon/${this.type}_pop.mp3`);
-        audio.play().catch(error => console.error('Error playing audio:', error));
     }
 
     setupEventListeners() {
@@ -79,25 +60,7 @@ export default class Balloon {
     }
 
     applyInertia(dx, dy) {
-        const friction = 0.95;
-        let vx = dx;
-        let vy = dy;
-
-        const move = () => {
-            vx *= friction;
-            vy *= friction;
-
-            const currentLeft = parseInt(this.element.style.left);
-            const currentTop = parseInt(this.element.style.top);
-
-            this.setPosition(currentLeft + vx, currentTop + vy);
-
-            if (Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1) {
-                requestAnimationFrame(move);
-            }
-        };
-
-        requestAnimationFrame(move);
+        this.behavior.applyInertia(dx, dy);
     }
 
     startFloating() {
