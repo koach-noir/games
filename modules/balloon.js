@@ -9,6 +9,7 @@ export default class Balloon {
         this.element = this.createElement();
         this.isPopped = false;
         this.behavior = new BalloonBehavior(this);
+        this.velocity = { x: 0, y: 0 };
 
         this.setupEventListeners();
     }
@@ -24,10 +25,23 @@ export default class Balloon {
     }
 
     setPosition(x, y) {
+        const containerRect = this.gameContainer.getBoundingClientRect();
+        const maxX = containerRect.width - this.size;
+        const maxY = containerRect.height - this.size;
+
+        // 風船が壁に触れたら反発する
+        if (x < 0 || x > maxX) {
+            this.velocity.x *= -1;
+            x = x < 0 ? 0 : maxX;
+        }
+        if (y < 0 || y > maxY) {
+            this.velocity.y *= -1;
+            y = y < 0 ? 0 : maxY;
+        }
+
         this.element.style.left = `${x}px`;
         this.element.style.top = `${y}px`;
     }
-
     pop() {
         if (this.isPopped) return;
         this.isPopped = true;

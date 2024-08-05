@@ -13,8 +13,8 @@ export class BalloonBehavior {
             const offsetX = Math.sin(time) * amplitude;
             const offsetY = Math.cos(time * 0.8) * amplitude;
 
-            const currentLeft = parseFloat(this.balloon.element.style.left);
-            const currentTop = parseFloat(this.balloon.element.style.top);
+            const currentLeft = parseFloat(this.balloon.element.style.left) || 0;
+            const currentTop = parseFloat(this.balloon.element.style.top) || 0;
 
             this.balloon.setPosition(currentLeft + offsetX, currentTop + offsetY);
         }, 50);
